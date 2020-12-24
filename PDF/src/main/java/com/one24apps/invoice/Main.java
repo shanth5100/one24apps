@@ -11,7 +11,7 @@ public class Main {
 
 //	static Logger logger = LoggerFactory.getLogger(InvoiceServiceImpl.class);
 	
-	public static void main(String[] args) {
+	public static void main() {
 		List<InvoiceItem> invoiceItemsList = new ArrayList<InvoiceItem>();
 		
 		InvoiceItem invoiceItems = new InvoiceItem();
