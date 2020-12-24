@@ -5,6 +5,14 @@ public class Client {
 	private Address addressDetails;
 	private String email;
 	private String website;
+	private String gstNo;
+	
+	public String getGstNo() {
+		return gstNo;
+	}
+	public void setGstNo(String gstNo) {
+		this.gstNo = gstNo;
+	}
 	
 	public String getClientName() {
 		return clientName;

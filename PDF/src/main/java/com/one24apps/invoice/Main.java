@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.one24apps.invoice.service.InvoiceService;
 import com.one24apps.invoice.service.impl.InvoiceServiceImpl;
 
 public class Main {
 
-	static Logger logger = LoggerFactory.getLogger(InvoiceServiceImpl.class);
+//	static Logger logger = LoggerFactory.getLogger(InvoiceServiceImpl.class);
 	
 	public static void main(String[] args) {
 		List<InvoiceItem> invoiceItemsList = new ArrayList<InvoiceItem>();
@@ -24,7 +21,7 @@ public class Main {
 		invoiceItems.setQuantity(2);
 		InvoiceItem invoiceItems1 = new InvoiceItem();
 		invoiceItems1.setDetails("Rent");
-		invoiceItems1.setGst(18);
+		invoiceItems1.setGst(18.1f);
 		invoiceItems1.setPrice(120);
 		invoiceItems1.setQuantity(1);
 		InvoiceItem invoiceItems2 = new InvoiceItem();
@@ -49,21 +46,20 @@ public class Main {
 		client.setClientName("clientName");
 		client.setAddressDetails(address);
 		client.setEmail("prashant@mail.124apps.com");
+		client.setGstNo("36AAHCG1369G1ZK");
 		client.setWebsite("www.124apps.com");
 		
 		Invoice invoice = new Invoice();
 		invoice.setClient(client);
 		invoice.setInvoiceItemList(invoiceItemsList);
 		invoice.setDate(new Date());
-		invoice.setGstNo("36AAHCG1369G1ZK");
 		invoice.setInvoiceNo(123l);
 		
 		InvoiceService invoiceService = new InvoiceServiceImpl();
 		if (invoice != null && invoice.getInvoiceItemList()!=null && !invoice.getInvoiceItemList().isEmpty() && invoice.getClient() != null && invoice.getClient().getAddressDetails() != null) {
 			invoiceService.genarateAndDownloadPDF(invoice);
-		} else {
-			logger.warn("", "Invoice should not be null");
-		}
+		} 
+		
 //		invoiceService.genarateAndDownloadPDF(client);
 	}
 

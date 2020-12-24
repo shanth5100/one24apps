@@ -5,7 +5,7 @@ public class InvoiceItem {
 	private String details;
 	private int quantity;
 	private double price;
-	private int gst;
+	private float gst; // float -> fractional errors
 	
 	public String getDetails() {
 		return details;
@@ -25,10 +25,10 @@ public class InvoiceItem {
 	public void setPrice(double price) {
 		this.price = price;
 	}
-	public int getGst() {
+	public float getGst() {
 		return gst;
 	}
-	public void setGst(int gst) {
+	public void setGst(float gst) {
 		this.gst = gst;
 	}
 	

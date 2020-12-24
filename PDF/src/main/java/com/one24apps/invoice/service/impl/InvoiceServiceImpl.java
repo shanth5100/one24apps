@@ -1,43 +1,61 @@
 package com.one24apps.invoice.service.impl;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.itextpdf.html2pdf.HtmlConverter;
 import com.one24apps.invoice.Address;
 import com.one24apps.invoice.Client;
 import com.one24apps.invoice.Invoice;
 import com.one24apps.invoice.InvoiceItem;
 import com.one24apps.invoice.service.InvoiceService;
 
+import io.woo.htmltopdf.HtmlToPdf;
+import io.woo.htmltopdf.HtmlToPdfObject;
+
 public class InvoiceServiceImpl implements InvoiceService{
 	
 	public void genarateAndDownloadPDF(Invoice invoice) {
 		if (invoice != null) {
 			if (invoice.getClient() != null && invoice.getClient().getClientName() != null && invoice.getInvoiceItemList() != null && !invoice.getInvoiceItemList().isEmpty()) {
-				String htmlTemplate = getHtmlTemplate(invoice);
 				
+				String htmlTemplate = getHtmlTemplate(invoice);
 				String currentMonth = getCurrentMonth();
-				try {
-//					HtmlConverter.convertToPdf(htmlTemplate, new FileOutputStream( System.getProperty("user.home") +"/" + client.getClientName()+ "-" + currentMonth +".pdf"));
-					HtmlConverter.convertToPdf(
-							htmlTemplate, new FileOutputStream( System.getProperty("user.home") + 
-									"/" + invoice.getClient().getClientName() + currentMonth + ".pdf"));
-					
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} 
+				
+				String destination = System.getProperty("user.home") + 
+						"/Downloads/" + invoice.getClient().getClientName() + currentMonth + ".pdf";
+//				JFileChooser jFileChooser = new JFileChooser();
+//				jFileChooser.setFileSelectionMode(jFileChooser.DIRECTORIES_ONLY);
+//				int option = jFileChooser.showSaveDialog(null);
+//				String path = null;
+//				if (option == JFileChooser.APPROVE_OPTION) {
+//					path = jFileChooser.getSelectedFile().getAbsolutePath();
+//				}
+
+//				try {
+////					HtmlConverter.convertToPdf(htmlTemplate, new FileOutputStream( System.getProperty("user.home") +"/" + client.getClientName()+ "-" + currentMonth +".pdf"));
+//					HtmlConverter.convertToPdf(
+//							htmlTemplate, new FileOutputStream( System.getProperty("user.home") + 
+//									"/" + invoice.getClient().getClientName() + currentMonth + "2"+".pdf"));
+//					
+////					HtmlConverter.convertToPdf(
+////							htmlTemplate, new FileOutputStream(path + "/" + invoice.getClient().getClientName() + currentMonth + ".pdf"));
+//					
+//				} catch (FileNotFoundException e) {
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				} 
+				
+				boolean success = HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
+						.object(HtmlToPdfObject.forHtml(htmlTemplate))
+						.convert(destination);
+				
+				System.out.println(success);
+				
 			} 
-		} else {
-			
-		}
+		} 
 	}
 
 	private String getCurrentMonth() {
@@ -108,7 +126,7 @@ public class InvoiceServiceImpl implements InvoiceService{
 
 	private String getOrganization() {
 		URL url = getClass().getClassLoader().getResource("Geekspace.jpg");
-		return "	<div>\n" + 
+		return "	<div style=\"padding-right:10px; padding-left:10px; \">\n" + 
 				"		<div class=\"row\">\n" + 
 				"			<div class=\"column\">\n" + 
 				"		      <p style=\"text-align: left; font-family: serif; font-size: 20px;\"> <b> Geekspace Business Centre </b> </p>\n" + 
@@ -116,26 +134,25 @@ public class InvoiceServiceImpl implements InvoiceService{
 				"		       	Manjeera Trinity Corporate <br>\n" + 
 				"		       	Kukatpally  <br>\n" + 
 				"				Hyderabad <br>\n" + 
-				"				Telangana, 500072\n" + 
+				"				Telangana, 500072 <br ><br >\n" + 
+				" 				<p><b>GSTIN: </b>36AAHCG1369G1ZK <br> <b>CIN: </b>U74999TG2018PTC121594</p>" +
 				"		    </div>\n" + 
 				"			<div class=\"column\">\n" + 
 				"				<p style=\"text-align: right; font-family: serif; font-size: 20px;\"> <b>INVOICE</b> </p><br>\n" + 
-				"				<img style=\"margin-left: 150px;\" src='" + url + "' alt=\"Geekspace\" width=\"200\" height=\"133\"/>" +
+				"				<img style=\"margin-left: 250px;\" src='" + url + "' alt=\"Geekspace\" width=\"200\" height=\"133\"/>" +
 				"			</div>\n" + 
 				"		</div>\n" + 
 				"	</div> <br>\n";
 	}
 	
 	private String getClientInfo(Invoice invoice) {
-//		Address address = invoice.getClient().getAddressDetails();
 		String addressDetails = getAddressDetails(invoice.getClient().getAddressDetails());
 		String shipTo = getShipTO(invoice.getClient());
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMM/YYYY");
 		String date = dateFormat.format(invoice.getDate());
-		return "	<div>\n" + 
+		return "	<div style=\"padding-right:10px; padding-left:10px; \">\n" + 
 				"		<div class=\"row\">\n" + 
 				"			<div class=\"spec-column-low\">\n" + 
-//				"		      	<p style=\"text-align: left; font-family: serif; font-size: 14px;\"> <b> Geekspace Business Center </b> </p>\n" + 
 				"				<div class=\"row\"> <span><p style=\"padding-left:18px\"><b>BILL TO</b></p></span></div>\n" + addressDetails +
 				"		    </div>\n" + shipTo +
 				"		<div class=\"spec-column-low\">\n" + 
@@ -144,7 +161,7 @@ public class InvoiceServiceImpl implements InvoiceService{
 				"		       	<span style=\"text-align: right;\">\n" + 
 				"				<b>DATE:</b></span> &nbsp;" + date + " <br>\n" +
 				"		       	<span style=\"text-align: right;\">\n" + 
-				"				<b>GSTIN:</b></span> &nbsp;" + invoice.getGstNo() + " <br>\n" +
+				"				<b>GSTIN:</b></span> &nbsp;" + invoice.getClient().getGstNo() + " <br>\n" +
 				"		    </div>\n" + 
 				"		</div>\n" + 
 				"	</div> <br>\n";
@@ -176,10 +193,11 @@ public class InvoiceServiceImpl implements InvoiceService{
 		
 		String invoiceItems = "<div style=\"padding-left: -10px;\"><table style=\"width: 100%;\">" + //   padding-top: -80;
 				" 			<thead><tr style=\"background-color: #b3fcfb;\">" + 
-				"			      <th style=\"width: 60%; padding-left: 10px;\">Description</th>" + 
+				"			      <th style=\"width: 50%; padding-left: 10px;\">Description</th>" + 
 				"			      <th>Quantity</th>" + 
-				"			      <th>Gst(%)</th>" + 
+				"			      <th style=\"width: 8%;\">Gst(%)</th>" + 
 				"			      <th>Price</th>" + 
+				"			      <th>Total</th>" + 
 				"			    </tr>" + 
 				" 			<thead><tbody>" + tableRows + "</tbody>" + 
 				tableFooter +
@@ -190,10 +208,12 @@ public class InvoiceServiceImpl implements InvoiceService{
 	private String getTableRows(List<InvoiceItem> list) {
 		String getRows = "";
 		for (InvoiceItem invoiceItem : list) {
+			Double amount = invoiceItem.getQuantity() * invoiceItem.getPrice();
 			getRows += "<tr><td style=\"padding-left: 10px;\">" + invoiceItem.getDetails() + "</td>\n" + 
 					"<td>" + invoiceItem.getQuantity() + "</td>\n" + 
 					"<td>" + invoiceItem.getGst() + "</td>\n" + 
-					"<td>" + invoiceItem.getPrice() + "</td></tr>\n";
+					"<td>" + invoiceItem.getPrice() + "</td>\n" +
+					"<td>" + amount + "</td></tr>\n";
 		}
 		getRows += "<tr><td style=\"padding-left: 10px;\"> &nbsp; </td>\n" + 
 				"<td></td>\n" + 
@@ -210,10 +230,12 @@ public class InvoiceServiceImpl implements InvoiceService{
 				"				<tr>\n" + 
 				"			      <td></td>\n" + 
 				"			      <td></td>\n" + 
+				"			      <td></td>\n" + 
 				"			      <td>SUBTOTAL</td>\n" + 
 				"			      <td>"+ subTotal +"</td>\n" + 
 				"			    </tr>\n" + 
 				"				<tr>\n" + 
+				"			      <td></td>\n" + 
 				"			      <td></td>\n" + 
 				"			      <td></td>\n" + 
 				"			      <td>GST</td>\n" + 
@@ -222,10 +244,12 @@ public class InvoiceServiceImpl implements InvoiceService{
 				"				<tr>\n" + 
 				"			      <td></td>\n" + 
 				"			      <td></td>\n" + 
+				"			      <td></td>\n" + 
 				"			      <td>TOTAL</td>\n" + 
 				"			      <td>"+ total_amount +"</td>\n" + 
 				"			    </tr>\n" + 
 				"				<tr>\n" + 
+				"			      <td></td>\n" + 
 				"			      <td></td>\n" + 
 				"			      <td></td>\n" + 
 				"			      <td><b>BALANCE DUE</b></td>\n" + 
@@ -238,7 +262,7 @@ public class InvoiceServiceImpl implements InvoiceService{
 	private Double getSubTotal(List<InvoiceItem> list) {
 		Double subTotal = 0.0;
 		for (InvoiceItem invoiceItem : list) {
-			subTotal += invoiceItem.getPrice();
+			subTotal += (invoiceItem.getPrice() * invoiceItem.getQuantity());
 		}
 		return subTotal;
 	}

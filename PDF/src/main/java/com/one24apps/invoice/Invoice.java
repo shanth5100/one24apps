@@ -6,7 +6,6 @@ import java.util.List;
 public class Invoice {
 	
 	private Long invoiceNo;
-	private String gstNo;
 	private Date date;
 	private Client client;
 	private List<InvoiceItem> invoiceItemList;
@@ -17,12 +16,7 @@ public class Invoice {
 	public void setInvoiceNo(Long invoiceNo) {
 		this.invoiceNo = invoiceNo;
 	}
-	public String getGstNo() {
-		return gstNo;
-	}
-	public void setGstNo(String gstNo) {
-		this.gstNo = gstNo;
-	}
+
 	public Date getDate() {
 		return date;
 	}
