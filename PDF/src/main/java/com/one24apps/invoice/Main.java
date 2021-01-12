@@ -11,7 +11,7 @@ public class Main {
 
 //	static Logger logger = LoggerFactory.getLogger(InvoiceServiceImpl.class);
 	
-	public static void main() {
+	public static void main(String args[]) { // String args[]
 		List<InvoiceItem> invoiceItemsList = new ArrayList<InvoiceItem>();
 		
 		InvoiceItem invoiceItems = new InvoiceItem();
@@ -43,7 +43,7 @@ public class Main {
 		address.setCuntry("India");
 		
 		Client client = new Client();
-		client.setClientName("clientName");
+		client.setClientName("client");
 		client.setAddressDetails(address);
 		client.setEmail("prashant@mail.124apps.com");
 		client.setGstNo("36AAHCG1369G1ZK");

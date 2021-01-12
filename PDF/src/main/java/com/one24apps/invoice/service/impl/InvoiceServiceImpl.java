@@ -1,9 +1,16 @@
 package com.one24apps.invoice.service.impl;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 
 import com.one24apps.invoice.Address;
 import com.one24apps.invoice.Client;
@@ -48,11 +55,13 @@ public class InvoiceServiceImpl implements InvoiceService{
 //					e.printStackTrace();
 //				} 
 				
-				boolean success = HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
-						.object(HtmlToPdfObject.forHtml(htmlTemplate))
-						.convert(destination);
+//				boolean success = HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
+//						.object(HtmlToPdfObject.forHtml(htmlTemplate))
+//						.convert(destination);
 				
-				System.out.println(success);
+				HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
+				.object(HtmlToPdfObject.forHtml(htmlTemplate))
+				.convert(destination);
 				
 			} 
 		} 
@@ -126,6 +135,30 @@ public class InvoiceServiceImpl implements InvoiceService{
 
 	private String getOrganization() {
 		URL url = getClass().getClassLoader().getResource("Geekspace.jpg");
+//		System.out.println("URL (Or) Images : " + url);
+//		String s = "https://www.google.com/search?q=images&rlz=1C5CHFA_enIN858IN858&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjM_5fMiZbuAhVdxTgGHWcLCOkQ_AUoAXoECCUQAw&biw=1790&bih=945#imgrc=wp1tdfttzeGYZM";
+//		ImageIcon geek_image = null;
+//		if (url != null) {
+//			geek_image = new ImageIcon(url);
+//		}
+//		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("Geekspace.jpg");
+//		JFrame f = new JFrame("Testing load resource from jar");
+//		try {
+//		    BufferedImage bg = ImageIO.read(getClass().getResource("/img/bg.png"));
+//		    f.setContentPane(new ImagePanel(bg));
+//		} catch (IOException e) {
+//		    e.printStackTrace();
+//		}
+//		byte[] buffer = new byte[3000];
+//		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("Geekspace.jpg");
+//		ImageIcon placeHolder = null;
+//		try {
+//			stream.read(buffer, 0, 3000);
+//			placeHolder = new ImageIcon(buffer);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return "	<div style=\"padding-right:10px; padding-left:10px; \">\n" + 
 				"		<div class=\"row\">\n" + 
 				"			<div class=\"column\">\n" + 
