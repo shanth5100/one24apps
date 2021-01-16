@@ -4,10 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -30,7 +32,6 @@ import com.one24apps.invoice.service.InvoiceService;
 public class InvoiceServiceImpl implements InvoiceService{
 	
 
-	@Override
 	public void genarateAndDownloadPDF(Invoice invoice) {
 		if (invoice != null) {
 			if (invoice.getClient() != null && invoice.getClient().getClientName() != null && invoice.getInvoiceItemList() != null && !invoice.getInvoiceItemList().isEmpty()) {
@@ -39,8 +40,8 @@ public class InvoiceServiceImpl implements InvoiceService{
 				String currentMonth = getCurrentMonth();
 				
 				String destination = System.getProperty("user.home") + 
-						"/Downloads/" + invoice.getClient().getClientName() + currentMonth + "12.pdf";
-				
+						"/Downloads/" + invoice.getClient().getClientName() + currentMonth + "AN.pdf";
+//				String destination = System.getProperty("user.home") + "/Downloads/" + "one1.pdf";
 				Document document = null;
 				try {
 					Image image = null;
@@ -48,7 +49,9 @@ public class InvoiceServiceImpl implements InvoiceService{
 					PdfWriter.getInstance(document, new FileOutputStream(destination));
 					document.open();
 					Font font = new Font(Font.HELVETICA, 12, Font.BOLD);
-					Paragraph para = new Paragraph("Hello World PDF created using OpenPDF", font);
+					Font text = new Font(Font.HELVETICA, 10);
+					Font boldText = new Font(Font.HELVETICA, 10, Font.BOLD);
+					Paragraph para = new Paragraph(" ", font);
 				    document.add(para);
 //					Table table = new Table(5);
 				    try {
@@ -57,21 +60,90 @@ public class InvoiceServiceImpl implements InvoiceService{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				    
 				    PdfPTable organisationInfo = new PdfPTable(2);
-				    organisationInfo.setWidthPercentage(100f);
 				    organisationInfo.getDefaultCell().setBorderWidth(0f);
-				    organisationInfo.addCell(new Phrase("Geekspace Business Centre", font));
-				    PdfPCell cell = new PdfPCell();
-				    cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-				    cell.setFixedHeight(100);
-				    cell.addElement(image);
-//				    cell.addElement(new Phrase("INVOICE", font));
-				    cell.setBorder(0);
-				    organisationInfo.addCell(cell);
+				    organisationInfo.setWidthPercentage(100f);
+				    organisationInfo.setWidths(new int[] {350, 100});
+				    
+				    PdfPCell cell1 = new PdfPCell();
+				    cell1.setBorderWidth(0f);
+				    cell1.addElement(new Paragraph(new Phrase("Geekspace Business Centre", font)));
+				    cell1.addElement(new Paragraph());
+				    cell1.addElement(new Paragraph(new Phrase("Plot No: 1204", text)));
+				    cell1.addElement(new Paragraph("Manjeera Trinity Corporate"));
+				    cell1.addElement(new Paragraph("Kukatpally"));
+				    cell1.addElement(new Paragraph("Hyderabad"));
+				    cell1.addElement(new Paragraph("Telangana, 500072"));
+
+				    PdfPCell cell2 = new PdfPCell();
+				    cell2.setBorderWidth(0f);
+				    cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+				    cell2.setVerticalAlignment(Element.ALIGN_RIGHT);
+				    cell2.addElement(new Paragraph(new Phrase("INVOICE", font)));
+				    cell2.addElement(new Paragraph(" "));
+				    cell2.addElement(image);
+				    
+				    
+				    organisationInfo.addCell(cell1);
+				    organisationInfo.addCell(cell2);
 				    document.add(organisationInfo);
+				    document.add(para); 
+				    
+//				    Billing address Table
+				    PdfPTable billingAddress = new PdfPTable(3);
+				    billingAddress.getDefaultCell().setBorderWidth(0f);
+				    billingAddress.setWidthPercentage(100f);
+				    
+//				    Table headers
+				    billingAddress.addCell(new Phrase("BILL TO", font));
+				    billingAddress.addCell(new Phrase("SHIP TO", font));
+				    billingAddress.addCell("");
+//				    Table Data
+				    Client client = invoice.getClient();
+				    // Row 1
+				    billingAddress.addCell(client.getAddressDetails().getHouseNum());
+				    billingAddress.addCell(client.getClientName());
+				    billingAddress.addCell("INVOICE No : " + invoice.getInvoiceNo());
+				    // Row 2
+				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMM/YYYY");
+					String date = dateFormat.format(invoice.getDate());
+				    billingAddress.addCell(client.getAddressDetails().getArea());
+				    billingAddress.addCell(client.getEmail());
+				    billingAddress.addCell("DATE : " + date);
+				    // Row 3
+				    billingAddress.addCell(client.getAddressDetails().getCity());
+				    billingAddress.addCell(client.getWebsite());
+				    billingAddress.addCell("GSTIN : " + client.getGstNo());
+				    // Row 4
+				    billingAddress.addCell(client.getAddressDetails().getState() + " - " + client.getAddressDetails().getPostCode());
+				    billingAddress.addCell(client.getAddressDetails().getHouseNum());
+				    billingAddress.addCell("");
+				    // Row 5
+				    billingAddress.addCell(client.getAddressDetails().getCuntry());
+				    billingAddress.addCell(client.getAddressDetails().getArea());
+				    billingAddress.addCell("");
+				 // Row 5
+				    billingAddress.addCell("");
+				    billingAddress.addCell(client.getAddressDetails().getCity());
+				    billingAddress.addCell("");
+				 // Row 5
+				    billingAddress.addCell("");
+				    billingAddress.addCell(client.getAddressDetails().getState() + " - " + client.getAddressDetails().getPostCode());
+				    billingAddress.addCell("");
+				 // Row 5
+				    billingAddress.addCell("");
+				    billingAddress.addCell(client.getAddressDetails().getCuntry());
+				    billingAddress.addCell("");
+				    
+				    document.add(billingAddress);
+				    document.add(para);
+				    
+//				    Invoice Item Table
 					PdfPTable table = new PdfPTable(5);
 					table.getDefaultCell().setBorderWidth(0f); // makes no cell borders
-					
+					table.setWidthPercentage(100f);
+					table.setWidths(new int[] {300, 100,100,100,100});
 				    // Setting table headers
 //				    Cell cell = new Cell();
 ////				    cell.setHeader(true);
@@ -82,7 +154,6 @@ public class InvoiceServiceImpl implements InvoiceService{
 //				    table.addCell(cell);
 				    
 					
-					
 				    table.addCell(new Phrase("Description", font));
 				      table.addCell(new Phrase("Quantity", font));          
 				      table.addCell(new Phrase("GST%", font));          
@@ -90,52 +161,58 @@ public class InvoiceServiceImpl implements InvoiceService{
 				      table.addCell(new Phrase("Total", font));
 //				      table.endHeaders();
 				      
-				      List<InvoiceItem> list = invoice.getInvoiceItemList();
 				      for (InvoiceItem invoiceItem : invoice.getInvoiceItemList()) {
-						table.addCell(invoiceItem.getDetails());
-						table.addCell(Integer.toString(invoiceItem.getQuantity()));
-						table.addCell(Double.toString(invoiceItem.getGst()));
-						table.addCell(Double.toString(invoiceItem.getPrice()));
-						table.addCell(Double.toString(invoiceItem.getPrice()));					
+				    	String gst = Float.toString(invoiceItem.getGst());
+						table.addCell(new Phrase(invoiceItem.getDetails(), text));
+						table.addCell(new Phrase(Integer.toString(invoiceItem.getQuantity()), text));
+						table.addCell(new Phrase(gst, text));
+						table.addCell(new Phrase(Double.toString(invoiceItem.getPrice()), text));
+						table.addCell(new Phrase(Double.toString(invoiceItem.getPrice() * invoiceItem.getQuantity()), text));					
 					}
 				      document.add(table);
+				      
+				      Double subTotal = getSubTotal(invoice.getInvoiceItemList());
+				      Double gstAmount = getTGstAmount(invoice.getInvoiceItemList());
+				      double total_amount = subTotal + gstAmount;
+				      
+				      PdfPTable dueTable = new PdfPTable(5);
+				      dueTable.getDefaultCell().setBorderWidth(0f); // makes no cell borders
+				      dueTable.setWidthPercentage(100f);
+				      dueTable.setWidths(new int[] {300, 100,100,100,100}); // sets col widths
+				      
+				      DecimalFormat decimalFormat = new DecimalFormat("0.000");
+				      
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell(new Phrase("SUBTOTAL", boldText));
+				      dueTable.addCell(new Phrase(decimalFormat.format(subTotal) + "", text));
+				      
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell(new Phrase("GST", boldText));
+				      dueTable.addCell(new Phrase(decimalFormat.format(gstAmount)+ "", text));
+				      
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell(new Phrase("TOTAL", boldText));
+				      dueTable.addCell(new Phrase(decimalFormat.format(total_amount) + "", text));
+				      
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell("");
+				      dueTable.addCell(new Phrase("BALANCE DUE", boldText));
+				      dueTable.addCell(new Phrase(decimalFormat.format(total_amount) + "", text));
+				      
+				      document.add(dueTable);
 				      document.close();
 				} catch (DocumentException | FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			
-//				JFileChooser jFileChooser = new JFileChooser();
-//				jFileChooser.setFileSelectionMode(jFileChooser.DIRECTORIES_ONLY);
-//				int option = jFileChooser.showSaveDialog(null);
-//				String path = null;
-//				if (option == JFileChooser.APPROVE_OPTION) {
-//					path = jFileChooser.getSelectedFile().getAbsolutePath();
-//				}
-
-//				try {
-////					HtmlConverter.convertToPdf(htmlTemplate, new FileOutputStream( System.getProperty("user.home") +"/" + client.getClientName()+ "-" + currentMonth +".pdf"));
-//					HtmlConverter.convertToPdf(
-//							htmlTemplate, new FileOutputStream( System.getProperty("user.home") + 
-//									"/" + invoice.getClient().getClientName() + currentMonth + "2"+".pdf"));
-//					
-////					HtmlConverter.convertToPdf(
-////							htmlTemplate, new FileOutputStream(path + "/" + invoice.getClient().getClientName() + currentMonth + ".pdf"));
-//					
-//				} catch (FileNotFoundException e) {
-//					e.printStackTrace();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				} 
-				
-//				boolean success = HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
-//						.object(HtmlToPdfObject.forHtml(htmlTemplate))
-//						.convert(destination);
-				
-//				HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
-//				.object(HtmlToPdfObject.forHtml(htmlTemplate))
-//				.convert(destination);
-				
 			} 
 		} 
 
@@ -161,7 +238,6 @@ public class InvoiceServiceImpl implements InvoiceService{
 					Font font = new Font(Font.HELVETICA, 12, Font.BOLD);
 					Paragraph para = new Paragraph("Hello World PDF created using OpenPDF", font);
 				    document.add(para);
-//					Table table = new Table(5);
 				    try {
 						image = Image.getInstance(getClass().getClassLoader().getResource("Geekspace.jpg"));
 					} catch (IOException e) {
@@ -182,18 +258,7 @@ public class InvoiceServiceImpl implements InvoiceService{
 				    document.add(organisationInfo);
 					PdfPTable table = new PdfPTable(5);
 					table.getDefaultCell().setBorderWidth(0f); // makes no cell borders
-					
-				    // Setting table headers
-//				    Cell cell = new Cell();
-////				    cell.setHeader(true);
-//				    cell.setVerticalAlignment(VerticalAlignment.CENTER);
-//				    cell.setHorizontalAlignment(HorizontalAlignment.CENTER);
-//				    cell.setColspan(5);
-//				    cell.setBackgroundColor(Color.LIGHT_GRAY);
-//				    table.addCell(cell);
-				    
-					
-					
+									
 				    table.addCell(new Phrase("Description", font));
 				      table.addCell(new Phrase("Quantity", font));          
 				      table.addCell(new Phrase("GST%", font));          
@@ -212,40 +277,8 @@ public class InvoiceServiceImpl implements InvoiceService{
 				      document.add(table);
 				      document.close();
 				} catch (DocumentException | FileNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			
-//				JFileChooser jFileChooser = new JFileChooser();
-//				jFileChooser.setFileSelectionMode(jFileChooser.DIRECTORIES_ONLY);
-//				int option = jFileChooser.showSaveDialog(null);
-//				String path = null;
-//				if (option == JFileChooser.APPROVE_OPTION) {
-//					path = jFileChooser.getSelectedFile().getAbsolutePath();
-//				}
-
-//				try {
-////					HtmlConverter.convertToPdf(htmlTemplate, new FileOutputStream( System.getProperty("user.home") +"/" + client.getClientName()+ "-" + currentMonth +".pdf"));
-//					HtmlConverter.convertToPdf(
-//							htmlTemplate, new FileOutputStream( System.getProperty("user.home") + 
-//									"/" + invoice.getClient().getClientName() + currentMonth + "2"+".pdf"));
-//					
-////					HtmlConverter.convertToPdf(
-////							htmlTemplate, new FileOutputStream(path + "/" + invoice.getClient().getClientName() + currentMonth + ".pdf"));
-//					
-//				} catch (FileNotFoundException e) {
-//					e.printStackTrace();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				} 
-				
-//				boolean success = HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
-//						.object(HtmlToPdfObject.forHtml(htmlTemplate))
-//						.convert(destination);
-				
-//				HtmlToPdf.create() //https://frontbackend.com/maven/artifact/org.apache.camel/maven-html-to-pdf/2.9.2
-//				.object(HtmlToPdfObject.forHtml(htmlTemplate))
-//				.convert(destination);
 				
 			} 
 		} 
@@ -319,30 +352,6 @@ public class InvoiceServiceImpl implements InvoiceService{
 
 	private String getOrganization() {
 		URL url = getClass().getClassLoader().getResource("Geekspace.jpg");
-//		System.out.println("URL (Or) Images : " + url);
-//		String s = "https://www.google.com/search?q=images&rlz=1C5CHFA_enIN858IN858&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjM_5fMiZbuAhVdxTgGHWcLCOkQ_AUoAXoECCUQAw&biw=1790&bih=945#imgrc=wp1tdfttzeGYZM";
-//		ImageIcon geek_image = null;
-//		if (url != null) {
-//			geek_image = new ImageIcon(url);
-//		}
-//		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("Geekspace.jpg");
-//		JFrame f = new JFrame("Testing load resource from jar");
-//		try {
-//		    BufferedImage bg = ImageIO.read(getClass().getResource("/img/bg.png"));
-//		    f.setContentPane(new ImagePanel(bg));
-//		} catch (IOException e) {
-//		    e.printStackTrace();
-//		}
-//		byte[] buffer = new byte[3000];
-//		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("Geekspace.jpg");
-//		ImageIcon placeHolder = null;
-//		try {
-//			stream.read(buffer, 0, 3000);
-//			placeHolder = new ImageIcon(buffer);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		return "	<div style=\"padding-right:10px; padding-left:10px; \">\n" + 
 				"		<div class=\"row\">\n" + 
 				"			<div class=\"column\">\n" + 
@@ -540,181 +549,4 @@ public class InvoiceServiceImpl implements InvoiceService{
 				"}" +
 				"</style>";
 	}
-
-
-//	private String getFooter() {
-//		String footer = "<footer>\n" +
-//				" <br><p> <span style=\"text-align: right;\">*** Make all checks payable ***</span></p>" + 
-//				"   <p><span style=\"text-align: left;\">Author: 124APPS Limited</p></div>\n" + 
-//				"</footer>";
-//		return footer;
-//	}
-	
-//	private String getFromTo(Invoice invoice) {
-//		Client client = invoice.getClient();
-//		return "<div class=\"row\">" +  
-//				"			<div class=\"column\">" + 
-//				"				<p style=\"font-size: 12\"> <b>From</b> </p>" + 
-//				"				Geekspace Business Center <br>" + 
-//				"				Manjeera Trinity Corporate <br>" + 
-//				"				Hyderabad <br>" + 
-//				"				Telangana, 500018" +
-//				"			</div>" + 
-//				"			<div class=\"column\">" + 
-//				"				<p style=\"font-size: 12\"> <b>To</b> </p>" + 
-//				client.getClientName() +" <br>" + 
-//				invoice.getGstNo() + "<br>" + 
-//				client.getEmail() + "<br>" + 
-//				client.getWebsite() +
-//				"</div></div>";
-//	}
-	
-//	private String getHtmlText () {
-//		String styles = getStyles();
-//		return "<!DOCTYPE html>\n" + 
-//		"<html>\n" + 
-//		"<head>\n" + 
-//		"<meta charset=\"UTF-8\">\n" + 
-//		"<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\">\n" + styles +
-//		"</head>\n" + 
-//		"<body>\n" + 
-//		"<div class=\"container\">\n" + 
-//		"	<br>\n" + 
-//		"	<div>\n" + 
-//		"		<div class=\"row\">\n" + 
-//		"			<div class=\"column\">\n" + 
-//		"		      <p style=\"text-align: left; font-family: serif; font-size: 20px;\"> <b> Geekspace Business Center </b> </p>\n" + 
-//		"		      	Plot No: 1204 <br>\n" + 
-//		"		       	Manjeera Trinity Corporate <br>\n" + 
-//		"		       	Kukatpally  <br>\n" + 
-//		"				Hyderabad <br>\n" + 
-//		"				Telangana, 500018\n" + 
-//		"		    </div>\n" + 
-//		"			<div class=\"column\">\n" + 
-//		"				<p style=\"text-align: right; font-family: serif; font-size: 20px;\"> <b>INVOICE</b> </p><br>\n" + 
-//		"				<div class=\"row\" >\n" + 
-//		"					<div class=\"spec-column-low\"></div>\n" + 
-//		"					<div class=\"spec-column\">\n" + 
-//		"						<div class=\"row\" style=\"text-align:center; background-color: aqua;\">\n" + 
-//		"							<div class=\"column\">\n" + 
-//		"								<span>Invoive Date</span>\n" + 
-//		"							</div>\n" + 
-//		"							<div class=\"column\">\n" + 
-//		"								<span>Invoive #</span>\n" + 
-//		"							</div>\n" + 
-//		"						</div>\n" + 
-//		"					</div>\n" + 
-//		"				</div>\n" + 
-//		"				<div class=\"row\" >\n" + 
-//		"					<div class=\"column\"></div>\n" + 
-//		"					<div class=\"column\">\n" + 
-//		"						<div class=\"row\" style=\"text-align:center;\">\n" + 
-//		"							<div class=\"column\">\n" + 
-//		"								<span>Invoice Date Dynamicly</span>\n" + 
-//		"							</div>\n" + 
-//		"							<div class=\"column\">\n" + 
-//		"								<span>Invoice Number Dynamicly</span>\n" + 
-//		"							</div>\n" + 
-//		"						</div>\n" + 
-//		"					</div>\n" + 
-//		"				</div>\n" + 
-//		"			</div>\n" + 
-//		"		</div>\n" + 
-//		"	</div> <br>\n" + 
-//		"	\n" + 
-//		"	<div>\n" + 
-//		"		<div class=\"row\">\n" + 
-//		"			<div class=\"col-sm-6\">\n" + 
-//		"				<div class=\"row\" style=\"background-color: aqua;\"> <span>BILL TO</span></div>\n" + 
-//		"		      <!-- <p style=\"text-align: left; font-family: serif; font-size: 20px;\"> <b> Geekspace Business Center </b> </p> -->\n" + 
-//		"		      	Plot No: 1204 <br>\n" + 
-//		"		       	Manjeera Trinity Corporate <br>\n" + 
-//		"		       	Kukatpally  <br>\n" + 
-//		"				Hyderabad <br>\n" + 
-//		"				Telangana, 500018\n" + 
-//		"		    </div>\n" + 
-//		"			<div class=\"col-sm-6\">\n" + 
-//		"				<div class=\"row\"> \n" + 
-//		"					<div class=\"row\" >\n" + 
-//		"						<div class=\"col-sm-6\"></div>\n" + 
-//		"						<div class=\"col-sm-6\">\n" + 
-//		"							<div class=\"row\" style=\"text-align:center; background-color: aqua;\">\n" + 
-//		"								<div class=\"col-sm-6\">\n" + 
-//		"									<span>Client ID</span>\n" + 
-//		"								</div>\n" + 
-//		"								<div class=\"col-sm-6\">\n" + 
-//		"									<span>TERMS</span>\n" + 
-//		"								</div>\n" + 
-//		"							</div>\n" + 
-//		"						</div>\n" + 
-//		"					</div>\n" + 
-//		"				</div>\n" + 
-//		"				<div class=\"row\" >\n" + 
-//		"					<div class=\"col-sm-6\"></div>\n" + 
-//		"					<div class=\"col-sm-6\">\n" + 
-//		"						<div class=\"row\" style=\"text-align:center;\">\n" + 
-//		"							<div class=\"col-sm-6\">\n" + 
-//		"								<span>Invoive Date</span>\n" + 
-//		"							</div>\n" + 
-//		"							<div class=\"col-sm-6\">\n" + 
-//		"								<span>Invoive #</span>\n" + 
-//		"							</div>\n" + 
-//		"						</div>\n" + 
-//		"					</div>\n" + 
-//		"				</div>\n" + 
-//		"				\n" + 
-//		"			</div>\n" + 
-//		"		</div>\n" + 
-//		"	</div> <br>\n" + 
-//		"	\n" + 
-//		"		<table style=\"width: 100%;\">\n" + 
-//		"			<thead style=\"background-color: highlight; color: green; padding-top: -20; text-align: left;\"> \n" + 
-//		"			\n" + 
-//		"				<tr>\n" + 
-//		"			      <th style=\"width: 60%;\">Description</th>\n" + 
-//		"			      <th>Quantity</th>\n" + 
-//		"			      <th>Gst(%)</th>\n" + 
-//		"			      <th>Price</th>\n" + 
-//		"			    </tr>\n" + 
-//		"			</thead>\n" + 
-//		"			<tbody>\n" + 
-//		"				<tr >\n" + 
-//		"			      <td>ksn</td>\n" + 
-//		"			      <td>1</td>\n" + 
-//		"			      <td>18</td>\n" + 
-//		"			      <td>112380</td>\n" + 
-//		"			    </tr>\n" + 
-//		"			    <tr>\n" + 
-//		"			      <td>ksd</td>\n" + 
-//		"			      <td>1</td>\n" + 
-//		"			      <td>18</td>\n" + 
-//		"			      <td>112380</td>\n" + 
-//		"			    </tr>\n" + 
-//		"			    <tr>\n" + 
-//		"			      <td>ks</td>\n" + 
-//		"			      <td>1</td>\n" + 
-//		"			      <td>18</td>\n" + 
-//		"			      <td>112380</td>\n" + 
-//		"			    </tr>\n" + 
-//		"			    <tr>\n" + 
-//		"			      <td>k</td>\n" + 
-//		"			      <td>1</td>\n" + 
-//		"			      <td>18</td>\n" + 
-//		"			      <td>112380</td>\n" + 
-//		"			    </tr>\n" + 
-//		"			</tbody>\n" + 
-//		"			<tfoot>\n" + 
-//		"				<tr>\n" + 
-//		"			      <td></td>\n" + 
-//		"			      <td></td>\n" + 
-//		"			      <td>TotalTotalTotal</td>\n" + 
-//		"			      <td>18</td>\n" + 
-//		"			    </tr>\n" + 
-//		"			</tfoot>	\n" + 
-//		"		</table>\n" + 
-//		"</div>\n" + 
-//		"</body>\n" + 
-//		"</html>";
-//	}
-
 }

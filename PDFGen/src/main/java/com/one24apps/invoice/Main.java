@@ -16,13 +16,13 @@ public class Main {
 		
 		InvoiceItem invoiceItems = new InvoiceItem();
 		invoiceItems.setDetails("Rent");
-		invoiceItems.setGst(18);
-		invoiceItems.setPrice(50000);
+		invoiceItems.setGst(18.2f);
+		invoiceItems.setPrice(50000.123);
 		invoiceItems.setQuantity(2);
 		InvoiceItem invoiceItems1 = new InvoiceItem();
 		invoiceItems1.setDetails("Rent");
-		invoiceItems1.setGst(18.1f);
-		invoiceItems1.setPrice(120);
+		invoiceItems1.setGst(18.1234f);
+		invoiceItems1.setPrice(120.12);
 		invoiceItems1.setQuantity(1);
 		InvoiceItem invoiceItems2 = new InvoiceItem();
 		invoiceItems2.setDetails("Rent");
@@ -31,7 +31,7 @@ public class Main {
 		invoiceItems2.setQuantity(1);
 		
 		invoiceItemsList.add(invoiceItems);
-//		invoiceItemsList.add(invoiceItems1);
+		invoiceItemsList.add(invoiceItems1);
 		invoiceItemsList.add(invoiceItems2);
 		
 		Address address = new Address();
@@ -43,7 +43,7 @@ public class Main {
 		address.setCuntry("India");
 		
 		Client client = new Client();
-		client.setClientName("client");
+		client.setClientName("KPHB");
 		client.setAddressDetails(address);
 		client.setEmail("prashant@mail.124apps.com");
 		client.setGstNo("36AAHCG1369G1ZK");
@@ -57,7 +57,8 @@ public class Main {
 		
 		InvoiceService invoiceService = new InvoiceServiceImpl();
 		if (invoice != null && invoice.getInvoiceItemList()!=null && !invoice.getInvoiceItemList().isEmpty() && invoice.getClient() != null && invoice.getClient().getAddressDetails() != null) {
-			invoiceService.genaratePDF(invoice);
+//			invoiceService.genaratePDF(invoice);
+			invoiceService.genarateAndDownloadPDF(invoice);
 		} 
 		
 //		invoiceService.genarateAndDownloadPDF(client);
