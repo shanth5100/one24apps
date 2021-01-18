@@ -59,7 +59,7 @@ public class Main {
 		if (invoice != null && invoice.getInvoiceItemList()!=null && !invoice.getInvoiceItemList().isEmpty() && invoice.getClient() != null && invoice.getClient().getAddressDetails() != null) {
 //			invoiceService.genaratePDF(invoice);
 			invoiceService.genarateAndDownloadPDF(invoice);
-		} 
+		}
 		
 //		invoiceService.genarateAndDownloadPDF(client);
 	}

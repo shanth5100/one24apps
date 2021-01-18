@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -15,6 +16,7 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Phrase;
+import com.lowagie.text.html.WebColors;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -73,7 +75,7 @@ public class InvoiceServiceImpl implements InvoiceService{
 				      
 				    Double subTotal = getSubTotal(invoice.getInvoiceItemList());
 				    Double gstAmount = getTGstAmount(invoice.getInvoiceItemList());
-				    double total_amount = subTotal + gstAmount;
+				    Double total_amount = subTotal + gstAmount;
 				      
 				    PdfPTable dueTable = getDueTable(subTotal, gstAmount, total_amount);
 				    document.add(dueTable);
@@ -134,13 +136,13 @@ public class InvoiceServiceImpl implements InvoiceService{
 		setTableProperties(table);
 		table.setWidths(new int[] {300, 100,100,130,100});				    
 		
-	    table.addCell(new Phrase("Description", font));
-	      table.addCell(new Phrase("Quantity", font));          
-	      table.addCell(new Phrase("GST%", font));          
-	      table.addCell(new Phrase("Price", font));          
-	      table.addCell(new Phrase("Total", font));
+	    table.addCell(getColoredCell("Description", font, true));
+	    table.addCell(getColoredCell("Quantity", font, true));          
+	    table.addCell(getColoredCell("GST%", font, true));          
+	    table.addCell(getColoredCell("Price", font, true));          
+	    table.addCell(getColoredCell("Total", font, true));
 	      
-	      for (InvoiceItem invoiceItem : invoice.getInvoiceItemList()) {
+	    for (InvoiceItem invoiceItem : invoice.getInvoiceItemList()) {
 	    	String gst = Float.toString(invoiceItem.getGst());
 			table.addCell(new Phrase(invoiceItem.getDetails(), text));
 			table.addCell(new Phrase(Integer.toString(invoiceItem.getQuantity()), text));
@@ -151,12 +153,34 @@ public class InvoiceServiceImpl implements InvoiceService{
 		return table;
 	}
 
+	private PdfPCell getCell() {
+		PdfPCell cell = new PdfPCell();
+		cell.setBorderWidth(0);
+		return cell;
+	}
 
+	private PdfPCell getColoredCell(String data, Font font1) {
+		return getColoredCell(data, font1, false);
+	}
+
+
+
+	private PdfPCell getColoredCell(String value, Font font, boolean color) {
+		PdfPCell cell = getCell();
+		if (color) {
+			cell.setBackgroundColor(WebColors.getRGBColor("#d9f8fa"));
+		}
+		cell.addElement(new Phrase(value, font));
+		return cell;
+	}
+
+	
 
 	private PdfPTable getBillingAddress(Invoice invoice) {
 		PdfPTable billingAddress = new PdfPTable(3);
 		setTableProperties(billingAddress);
-	    
+	    billingAddress.setWidths(new float[] {35f, 35f, 30f});
+		
 //	    Table headers
 	    billingAddress.addCell(new Phrase("BILL TO", font));
 	    billingAddress.addCell(new Phrase("SHIP TO", font));
@@ -166,17 +190,33 @@ public class InvoiceServiceImpl implements InvoiceService{
 	    // Row 1
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getHouseNum(), text));
 	    billingAddress.addCell(new Phrase(client.getClientName(), text));
-	    billingAddress.addCell(new Phrase("INVOICE No : " + invoice.getInvoiceNo(), text));
+	    PdfPCell invoiceNo = getCell();
+	    invoiceNo.setPaddingBottom(-10);
+	    
+	    invoiceNo.addElement(getPhrase("INVOICE No : ", boldText, invoice.getInvoiceNo().toString(), text));
+	    billingAddress.addCell(invoiceNo);
 	    // Row 2
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMM/YYYY");
 		String date = dateFormat.format(invoice.getDate());
+		
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getArea(), text));
 	    billingAddress.addCell(new Phrase(client.getEmail(), text));
-	    billingAddress.addCell(new Phrase("DATE : " + date, text));
+	    PdfPCell invoiceDate = getCell();
+	    invoiceDate.setPaddingBottom(-10);
+	    
+	    invoiceDate.addElement(getPhrase("DATE : ", boldText, date, text));
+	    billingAddress.addCell(invoiceDate);
+	    
+	    
 	    // Row 3
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getCity(), text));
 	    billingAddress.addCell(new Phrase(client.getWebsite(), text));
-	    billingAddress.addCell(new Phrase("GSTIN : " + client.getGstNo(), text));
+	    PdfPCell gstIn = getCell();
+	    gstIn.setPaddingBottom(-10);
+	    
+	    gstIn.addElement(getPhrase("GSTIN : ", boldText, client.getGstNo(), text));
+	    billingAddress.addCell(gstIn);
+	    
 	    // Row 4
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getState() + " - " + client.getAddressDetails().getPostCode(), text));
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getHouseNum(), text));
@@ -185,15 +225,15 @@ public class InvoiceServiceImpl implements InvoiceService{
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getCuntry(), text));
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getArea(), text));
 	    billingAddress.addCell("");
-	 // Row 5
+	 // Row 6
 	    billingAddress.addCell("");
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getCity(), text));
 	    billingAddress.addCell("");
-	 // Row 5
+	 // Row 7
 	    billingAddress.addCell("");
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getState() + " - " + client.getAddressDetails().getPostCode(), text));
 	    billingAddress.addCell("");
-	 // Row 5
+	 // Row 8
 	    billingAddress.addCell("");
 	    billingAddress.addCell(new Phrase(client.getAddressDetails().getCuntry(), text));
 	    billingAddress.addCell("");
@@ -202,13 +242,19 @@ public class InvoiceServiceImpl implements InvoiceService{
 
 
 
+	private Phrase getPhrase(String string, Font boldText, String string1, Font text) {
+		Phrase phrase = new Phrase();
+		phrase.add(new Chunk(string, boldText));
+		phrase.add(new Chunk(string1, text));
+		return phrase;
+	}
+
 	private PdfPTable getOrganisation(Image image) {
 		PdfPTable organisationInfo = new PdfPTable(2);
 		setTableProperties(organisationInfo);
 	    organisationInfo.setWidths(new int[] {350, 100});
 	    
-	    PdfPCell cell1 = new PdfPCell();
-	    cell1.setBorderWidth(0f);
+	    PdfPCell cell1 = getCell();
 	    cell1.addElement(new Paragraph(new Phrase("Geekspace Business Centre", font)));
 	    cell1.addElement(new Paragraph(" "));
 	    cell1.addElement(new Paragraph(new Phrase("Plot No: 1204", text)));
@@ -217,8 +263,7 @@ public class InvoiceServiceImpl implements InvoiceService{
 	    cell1.addElement(new Paragraph(new Phrase("Hyderabad", text)));
 	    cell1.addElement(new Paragraph(new Phrase("Telangana, 500072", text)));
 
-	    PdfPCell cell2 = new PdfPCell();
-	    cell2.setBorderWidth(0f);
+	    PdfPCell cell2 = getCell();
 	    cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
 	    cell2.setVerticalAlignment(Element.ALIGN_RIGHT);
 	    cell2.addElement(new Paragraph(new Phrase("INVOICE", font)));
